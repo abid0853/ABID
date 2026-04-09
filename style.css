@@ -349,10 +349,68 @@ footer { background: var(--black); color: var(--white); padding: 100px 10% 40px;
 .btn-primary.btn-secondary {
     background: transparent;
     color: var(--black);
-    border-color: var(--border);
+    border: 1px solid var(--black); /* Solid black border so the box is visible */
 }
 
 .btn-primary.btn-secondary:hover {
+    background: var(--black); /* Background inverts to black */
+    color: var(--white);      /* Text inverts to white */
     border-color: var(--black);
-    background: var(--light-gray);
 }
+
+/* --- FORCE MOBILE RESPONSIVENESS FOR ADMIN PANEL --- */
+        @media (max-width: 850px) {
+            /* 1. Force the layout to stack vertically */
+            .admin-layout {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* 2. Turn the sidebar into a horizontal swipeable bar at the top */
+            .admin-sidebar {
+                width: 100% !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 1000 !important;
+                padding: 10px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Hide the title to save space */
+            .admin-sidebar h2 { display: none !important; }
+
+            /* Style tabs as neat, tappable chips */
+            .tab-btn {
+                flex: 0 0 auto !important;
+                padding: 10px 15px !important;
+                background: #222 !important;
+                color: #aaa !important;
+                border-radius: 4px !important;
+                border: none !important;
+                margin-right: 5px;
+                font-size: 0.85rem !important;
+                white-space: nowrap !important;
+            }
+
+            .tab-btn.active {
+                background: var(--white) !important;
+                color: var(--black) !important;
+            }
+
+            .logout-btn { background: #331111 !important; color: #ff4d4d !important; }
+
+            /* 3. Give the main content full width so inputs aren't squished */
+            .admin-content {
+                width: 100% !important;
+                padding: 15px !important;
+            }
+
+            .admin-form {
+                grid-template-columns: 1fr !important; /* Stack form inputs */
+                padding: 15px !important;
+                gap: 15px !important;
+            }
+        }

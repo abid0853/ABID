@@ -54,91 +54,8 @@
                 <span class="italic">Featured Work.</span>
             </h1>
 
-            <div class="projects-grid">
-
-                <div class="project-card">
-                    <div class="project-img-wrapper">
-                        <img src="img/projects/poultry-shield.png" alt="Poultry Shield AI">
-                    </div>
-                    <div class="project-content">
-                        <h2>Poultry Shield AI</h2>
-
-                        <h3 class="project-title">Multimodal ML Diagnostic Platform</h3>
-                        <p class="project-tech">Flutter • Python • TensorFlow • Flask • REST API</p>
-                        <p class="project-desc">
-                            An early-warning diagnostic system for commercial poultry farmers. 
-                            Utilizes custom <strong>Convolutional Neural Networks (CNN)</strong> for visual symptom detection 
-                            and Librosa-based <strong>acoustic analysis</strong> to filter farm noise and identify respiratory infections. 
-                            Features an interactive disease hotspot map and a Groq-powered AI assistant.
-                        </p>
-                        <div class="hero-btns project-links" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                            <a href="https://poultryshieldzones.vercel.app" target="_blank" class="btn-primary">Live Zone Map</a>
-                            <a href="https://github.com/abid0853/poultry_ai_frontend" target="_blank" class="btn-primary btn-secondary">Frontend Code</a>
-                            <a href="https://github.com/abid0853/poultry_ai_backend" target="_blank" class="btn-primary btn-secondary">Backend Code</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="project-card">
-                    <div class="project-img-wrapper">
-                        <img src="img/projects/aqi.png" alt="AQI Navigator">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">AQI Navigator</h3>
-                        <p class="project-tech">Machine Learning • NASA TEMPO • API</p>
-                        <p class="project-desc">
-                            A Machine Learning-powered web application designed to predict the Air Quality Index (AQI) 
-                            by synthesizing NASA’s TEMPO satellite data with ground-based sensor readings. 
-                            Features real-time health risk categorization, live weather tracking, and a smart route feature.
-                        </p>
-                        <div class="hero-btns project-links">
-                            <a href="https://nasa-web-app-1b7c8.web.app/" target="_blank" class="btn-primary">View Live</a>
-                            <a href="https://github.com/abid0853/nasa-aqi-project" target="_blank" class="btn-primary btn-secondary">GitHub</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="project-card">
-                    <div class="project-img-wrapper">
-                        <img src="img/projects/looklock.jpg" alt="LookLock">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">LookLock: Frictionless Retail Security and Loss Prevention.</h3>
-                        <p class="project-tech">Computer Vision • TensorFlow • OpenCV</p>
-                        <p class="project-desc">
-                            This project visualizes a next-generation retail solution powered by sophisticated computer vision and edge computing ("SECURE EDGE"). LookLock is designed to seamlessly identify customers and their purchases. As depicted, the system uses integrated Face and Body Engines to assign visual IDs and automatically extract clothing details (attributes and hue). This data is processed locally, matched against real-time Point-of-Sale (POS) status, and successfully verified instantly, creating a faster, smoother, and more secure shopping experience.
-                        </p>
-                        <div class="hero-btns project-links">
-                            <a href="https://github.com/abid0853/LookLock---CV-Textile-Security" target="_blank" class="btn-primary">GitHub</a>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="project-card">
-                    <div class="project-img-wrapper">
-                        <img src="img/projects/gym.png" alt="Interactive Web Portal">
-                    </div>
-                    <div class="project-content">
-                        <h2>Gym Management PWA</h2>
-
-                        <h3 class="project-title">Progressive Web App</h3>
-                        <p class="project-tech">Firebase • JavaScript • Full-Stack</p>
-                        <p class="project-desc">
-                           A comprehensive digital solution for fitness centers featuring a real-time 
-                           <strong>Admin Dashboard</strong> and an <strong>Attendance Kiosk</strong>. 
-                           Automates membership tracking, payment collection, and daily check-ins 
-                           through a responsive, cross-platform interface.
-                        </p>
-                        <div class="hero-btns project-links">
-                            <a href="https://gym-app-b2094.web.app/" target="_blank" class="btn-primary">View Live</a>
-                            <a href="https://github.com/abid0853/gym-pwa" target="_blank" class="btn-primary btn-secondary">GitHub</a>
-                            <a href="https://gym-app-b2094.web.app/attendence.html" target="_blank" class="btn-primary">Attendence</a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+            <div class="projects-grid" id="dynamic-projects-container"></div>
+            
         </div>
     </section>
 
@@ -158,6 +75,78 @@
             </div>
         </div>
     </footer>
+
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // PASTE YOUR CONFIG HERE AGAIN
+    const firebaseConfig = {
+  apiKey: "AIzaSyDFhAFNC_veISpG4dH1C3Kfja_wqKpgpD0",
+  authDomain: "portfolio-admin-54aae.firebaseapp.com",
+  projectId: "portfolio-admin-54aae",
+  storageBucket: "portfolio-admin-54aae.firebasestorage.app",
+  messagingSenderId: "636634508521",
+  appId: "1:636634508521:web:c213609daa0ed959429478",
+  measurementId: "G-Z4EDSHZ0WD"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadProjects() {
+        const container = document.getElementById('dynamic-projects-container');
+        container.innerHTML = "<p>Loading projects...</p>"; // Loading state
+
+        try {
+            // Get projects sorted by creation date
+            const q = query(collection(db, "projects"), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
+            
+            container.innerHTML = ""; // Clear loading state
+
+            querySnapshot.forEach((doc) => {
+                const project = doc.data();
+                
+                // Set up the dynamic GitHub buttons (Defaults to 'GitHub' if name is left blank)
+                const git1Url = project.githubLink1 || project.githubLink || ''; 
+                const git1Name = project.githubName1 || 'GitHub';
+                
+                const git2Url = project.githubLink2 || '';
+                const git2Name = project.githubName2 || 'GitHub';
+                
+                // Build the HTML template string
+                const cardHTML = `
+                    <div class="project-card">
+                        <div class="project-img-wrapper">
+                            <img src="${project.imageUrl}" alt="${project.title}">
+                        </div>
+                        <div class="project-content">
+                            <h3 class="project-title">${project.title}</h3>
+                            ${project.date ? `<p style="font-size: 0.8rem; color: #888; font-weight: 800; margin-bottom: 5px;">COMPLETED: ${project.date}</p>` : ''}
+                            <p class="project-tech">${project.techStack}</p>
+                            <p class="project-desc">${project.description}</p>
+                            <div class="hero-btns project-links" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                ${project.liveLink ? `<a href="${project.liveLink}" target="_blank" class="btn-primary">View Live</a>` : ''}
+                                ${git1Url ? `<a href="${git1Url}" target="_blank" class="btn-primary btn-secondary">${git1Name}</a>` : ''}
+                                ${git2Url ? `<a href="${git2Url}" target="_blank" class="btn-primary">${git2Name}</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // Inject it into the page
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        } catch (error) {
+            console.error("Error fetching projects: ", error);
+            container.innerHTML = "<p>Failed to load projects.</p>";
+        }
+    }
+
+    // Run the function when page loads
+    loadProjects();
+</script>
 
 </body>
 </html>

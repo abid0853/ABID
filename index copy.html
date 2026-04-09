@@ -82,7 +82,7 @@
                     <a href="https://github.com/abid0853" target="_blank" class="btn-primary">GitHub</a>
                     <a href="https://www.linkedin.com/in/abidts/" target="_blank" class="btn-primary btn-secondary">LinkedIn</a>
                     <a href="certificates.html" class="btn-primary">Certificates</a>
-                    <a href="#" id="dynamic-resume-btn" target="_blank" class="btn-primary btn-secondary">Download Resume</a>
+                    <a href="files/Abid_TS_Resume.pdf" download="Abid_TS_Resume.pdf" class="btn-primary btn-secondary">Download Resume</a>
                     
                 </div>
             </div>
@@ -169,37 +169,6 @@
             </div>
         </div>
     </footer>
-
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // PASTE YOUR FIREBASE CONFIG HERE
-    const firebaseConfig = {
-  apiKey: "AIzaSyDFhAFNC_veISpG4dH1C3Kfja_wqKpgpD0",
-  authDomain: "portfolio-admin-54aae.firebaseapp.com",
-  projectId: "portfolio-admin-54aae",
-  storageBucket: "portfolio-admin-54aae.firebasestorage.app",
-  messagingSenderId: "636634508521",
-  appId: "1:636634508521:web:c213609daa0ed959429478",
-  measurementId: "G-Z4EDSHZ0WD"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function fetchResumeUrl() {
-        try {
-            const docRef = doc(db, "settings", "resume");
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                // Update the button's href to the live Firebase Storage URL
-                document.getElementById('dynamic-resume-btn').href = docSnap.data().url;
-            }
-        } catch (error) { console.error("Could not fetch resume URL"); }
-    }
-    fetchResumeUrl();
-</script>
 
 </body>
 </html>

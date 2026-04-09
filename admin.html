@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* ADMIN SPECIFIC STYLES */
+        body { background-color: #f4f4f4; }
+        
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            background: var(--black);
+            color: var(--white);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .admin-sidebar h2 { font-family: 'Playfair Display', serif; font-style: italic; margin-bottom: 30px; font-size: 1.5rem; }
+        .tab-btn {
+            background: transparent;
+            color: #888;
+            border: none;
+            text-align: left;
+            padding: 10px;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+        .tab-btn.active, .tab-btn:hover { color: var(--white); border-left-color: var(--white); }
+        .logout-btn { margin-top: auto; color: #ff4d4d; border-left-color: transparent; }
+
+        /* Main Content area */
+        .admin-content { padding: 50px; overflow-y: auto; background: var(--white); }
+        .admin-header { margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .admin-header h1 { font-size: 2.5rem; font-weight: 800; }
+        
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        /* Forms */
+        .admin-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: var(--light-gray);
+            padding: 30px;
+            border: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--gray-text); margin-bottom: 8px; }
+        .form-input {
+            padding: 12px;
+            border: 1px solid var(--border);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            background: var(--white);
+            transition: var(--transition);
+        }
+        .form-input:focus { outline: none; border-color: var(--black); }
+        textarea.form-input { resize: vertical; min-height: 100px; }
+
+        /* Data Tables for organizing */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        .data-table th { font-size: 0.8rem; text-transform: uppercase; color: var(--gray-text); }
+        .data-table img { width: 60px; height: 40px; object-fit: cover; border: 1px solid var(--border); }
+        .action-btns { display: flex; gap: 10px; }
+        .btn-edit { color: #007bff; cursor: pointer; font-weight: 600; font-size: 0.85rem; text-decoration: none;}
+        .btn-delete { color: #ff4d4d; cursor: pointer; font-weight: 600; font-size: 0.85rem; text-decoration: none;}
+    </style>
+</head>
+<body>
+    <div id="login-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--black); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <form id="loginForm" style="background: var(--white); padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center;">
+            <h2 style="font-family: 'Playfair Display', serif; font-style: italic; margin-bottom: 20px;">Admin Login</h2>
+            <input type="email" id="adminEmail" placeholder="Email" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <input type="password" id="adminPassword" placeholder="Password" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <button type="submit" class="btn-primary" style="width: 100%; cursor: pointer;">Login</button>
+        </form>
+    </div>
+
+    <div class="admin-layout" id="admin-dashboard" style="display: none;">
+        <aside class="admin-sidebar">
+            <h2>Admin Panel</h2>
+            <button class="tab-btn active" onclick="switchTab('projects')">Manage Projects</button>
+            <button class="tab-btn" onclick="switchTab('certificates')">Manage Certificates</button>
+            <button class="tab-btn" onclick="switchTab('files')">Manage Files & Resume</button>
+            <button class="tab-btn logout-btn">Logout</button>
+        </aside>
+
+        <main class="admin-content">
+            
+            <section id="projects" class="tab-section active">
+                <div class="admin-header">
+                    <h1>Projects</h1>
+                    <p class="project-desc">Add, edit, or remove featured projects.</p>
+                </div>
+
+                <form class="admin-form" id="projectForm">
+                    <div class="form-group full-width">
+                        <h3 style="margin-bottom: 15px;">Add New Project</h3>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Title</label>
+                        <input type="text" class="form-input" placeholder="e.g. Poultry Shield AI">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tech Stack (Subtitle)</label>
+                        <input type="text" class="form-input" placeholder="e.g. Flutter • Python • Flask">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Completion Date</label>
+                        <input type="date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image Upload</label>
+                        <input type="file" class="form-input" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Live Link URL</label>
+                        <input type="url" class="form-input" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">GitHub Link 1 (Primary)</label>
+                        <input type="url" class="form-input" placeholder="https://github.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Button 1 Name</label>
+                        <input type="text" class="form-input" placeholder="Leave blank for 'GitHub'">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">GitHub Link 2 (Optional)</label>
+                        <input type="url" class="form-input" placeholder="https://github.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Button 2 Name</label>
+                        <input type="text" class="form-input" placeholder="e.g. Backend Code">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-input" placeholder="Write a brief description..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-primary">Save Project</button>
+                    </div>
+                </form>
+
+                <table class="data-table">
+                 <thead>
+                   <tr>
+                     <th>Image</th>
+                     <th>Title</th>
+                     <th>Date</th>
+                     <th>Actions</th>
+                  </tr>
+                 </thead>
+                <tbody id="admin-projects-tbody">
+                  <tr><td colspan="4">Loading projects from database...</td></tr>
+                </tbody>
+               </table>
+            </section>
+
+            <section id="certificates" class="tab-section">
+                <div class="admin-header">
+                    <h1>Certificates</h1>
+                    <p class="project-desc">Add or remove your credentials.</p>
+                </div>
+
+                <form class="admin-form" id="certForm">
+                    <div class="form-group full-width">
+                        <h3 style="margin-bottom: 15px;">Add New Certificate</h3>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Certificate Name</label>
+                        <input type="text" class="form-input" placeholder="e.g. NASA Local Rank">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date Issued</label>
+                        <input type="date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Verify Link URL</label>
+                        <input type="url" class="form-input" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image Upload</label>
+                        <input type="file" class="form-input" accept="image/*">
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-primary">Save Certificate</button>
+                    </div>
+                </form>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-certs-tbody">
+                        <tr><td colspan="4">Loading certificates...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="files" class="tab-section">
+                <div class="admin-header">
+                    <h1>Files & Assets</h1>
+                    <p class="project-desc">Update your downloadable resume and public files.</p>
+                </div>
+
+                <form class="admin-form" id="resumeForm">
+                    <div class="form-group full-width">
+                        <h3 style="margin-bottom: 15px;">Update Resume (PDF)</h3>
+                        <p style="font-size: 0.85rem; color: var(--gray-text); margin-bottom: 15px;">
+                            Uploading a new PDF here will automatically replace the file linked to the "Download Resume" button on your homepage.
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select PDF File</label>
+                        <input type="file" class="form-input" accept="application/pdf">
+                    </div>
+                    <div class="form-group">
+                        <label style="opacity: 0;">Spacer</label>
+                        <button type="submit" class="btn-primary btn-secondary">Upload & Replace Resume</button>
+                    </div>
+                </form>
+            </section>
+
+        </main>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // 1. PASTE YOUR FIREBASE CONFIG HERE
+    const firebaseConfig = {
+  apiKey: "AIzaSyDFhAFNC_veISpG4dH1C3Kfja_wqKpgpD0",
+  authDomain: "portfolio-admin-54aae.firebaseapp.com",
+  projectId: "portfolio-admin-54aae",
+  storageBucket: "portfolio-admin-54aae.firebasestorage.app",
+  messagingSenderId: "636634508521",
+  appId: "1:636634508521:web:c213609daa0ed959429478",
+  measurementId: "G-Z4EDSHZ0WD"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+
+    // --- AUTHENTICATION LOGIC ---
+    const loginScreen = document.getElementById('login-screen');
+    const adminDashboard = document.getElementById('admin-dashboard');
+
+    // Listen for login state changes
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is logged in! Hide login screen, show dashboard, load data.
+            loginScreen.style.display = 'none';
+            adminDashboard.style.display = 'grid';
+            loadAdminProjects();
+            loadAdminCerts();
+        } else {
+            // User is logged out. Show login screen.
+            loginScreen.style.display = 'flex';
+            adminDashboard.style.display = 'none';
+        }
+    });
+
+    // Handle Login Form Submission
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('adminEmail').value;
+        const pass = document.getElementById('adminPassword').value;
+        const btn = e.target.querySelector('button');
+        btn.innerText = "Authenticating...";
+
+        signInWithEmailAndPassword(auth, email, pass)
+            .then(() => { btn.innerText = "Login"; })
+            .catch((error) => {
+                alert("Login failed. Check your credentials.");
+                btn.innerText = "Login";
+            });
+    });
+
+    // Handle Logout Button
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+        signOut(auth);
+    });
+
+    // Global states
+    let editingProjectId = null;
+    window.loadedProjects = {};
+    let editingCertId = null;
+    window.loadedCerts = {};
+
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ==========================================
+    // PROJECTS LOGIC (Kept exactly as it was)
+    // ==========================================
+    async function loadAdminProjects() {
+        const tbody = document.getElementById('admin-projects-tbody');
+        try {
+            const q = query(collection(db, "projects"), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
+            tbody.innerHTML = ""; 
+            querySnapshot.forEach((document) => {
+                const project = document.data();
+                window.loadedProjects[document.id] = project; 
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><img src="${project.imageUrl || ''}" style="width: 60px; height: 40px; object-fit: cover;"></td>
+                        <td><strong>${project.title}</strong></td>
+                        <td>${project.date || 'N/A'}</td>
+                        <td class="action-btns">
+                            <a class="btn-edit" onclick="editProject('${document.id}')">Edit</a>
+                            <a class="btn-delete" onclick="deleteProject('${document.id}')">Delete</a>
+                        </td>
+                    </tr>
+                `);
+            });
+        } catch (error) { tbody.innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>'; }
+    }
+
+    window.deleteProject = async function(id) {
+        if (confirm("Delete this project?")) {
+            await deleteDoc(doc(db, "projects", id));
+            loadAdminProjects();
+        }
+    }
+
+    window.editProject = function(id) {
+        const p = window.loadedProjects[id];
+        editingProjectId = id; 
+        const inputs = document.getElementById('projectForm').querySelectorAll('.form-input');
+        
+        inputs[0].value = p.title || ""; 
+        inputs[1].value = p.techStack || "";
+        inputs[2].value = p.date || ""; 
+        inputs[4].value = p.liveLink || "";
+        
+        // Fallback to old 'githubLink' if it exists, otherwise use new format
+        inputs[5].value = p.githubLink1 || p.githubLink || ""; 
+        inputs[6].value = p.githubName1 || ""; 
+        inputs[7].value = p.githubLink2 || ""; 
+        inputs[8].value = p.githubName2 || ""; 
+        
+        inputs[9].value = p.description || "";
+        document.getElementById('projectForm').querySelector('button').innerText = "Update Project";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button'); btn.innerText = "Saving...";
+        const inputs = e.target.querySelectorAll('.form-input');
+        try {
+            let imageUrl = editingProjectId ? window.loadedProjects[editingProjectId].imageUrl : "";
+            if (inputs[3].files[0]) {
+                const sRef = ref(storage, 'projects/' + inputs[3].files[0].name);
+                await uploadBytes(sRef, inputs[3].files[0]);
+                imageUrl = await getDownloadURL(sRef); 
+            }
+            const data = { 
+                title: inputs[0].value, 
+                techStack: inputs[1].value, 
+                date: inputs[2].value, 
+                imageUrl: imageUrl, 
+                liveLink: inputs[4].value, 
+                githubLink1: inputs[5].value, 
+                githubName1: inputs[6].value,
+                githubLink2: inputs[7].value, 
+                githubName2: inputs[8].value,
+                description: inputs[9].value 
+            };
+            
+            if (editingProjectId) { await updateDoc(doc(db, "projects", editingProjectId), data); } 
+            else { data.createdAt = new Date(); await addDoc(collection(db, "projects"), data); }
+            
+            e.target.reset(); editingProjectId = null; btn.innerText = "Save Project"; loadAdminProjects();
+        } catch (err) { alert("Error saving project."); btn.innerText = "Save Project"; }
+    });
+
+
+    // ==========================================
+    // CERTIFICATES LOGIC
+    // ==========================================
+    async function loadAdminCerts() {
+        const tbody = document.getElementById('admin-certs-tbody');
+        try {
+            const q = query(collection(db, "certificates"), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
+            tbody.innerHTML = ""; 
+            querySnapshot.forEach((document) => {
+                const cert = document.data();
+                window.loadedCerts[document.id] = cert; 
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><img src="${cert.imageUrl || ''}" style="width: 60px; height: 40px; object-fit: cover;"></td>
+                        <td><strong>${cert.name}</strong></td>
+                        <td>${cert.date || 'N/A'}</td>
+                        <td class="action-btns">
+                            <a class="btn-edit" onclick="editCert('${document.id}')">Edit</a>
+                            <a class="btn-delete" onclick="deleteCert('${document.id}')">Delete</a>
+                        </td>
+                    </tr>
+                `);
+            });
+        } catch (error) { tbody.innerHTML = '<tr><td colspan="4">Error loading certificates.</td></tr>'; }
+    }
+
+    window.deleteCert = async function(id) {
+        if (confirm("Delete this certificate?")) {
+            await deleteDoc(doc(db, "certificates", id));
+            loadAdminCerts();
+        }
+    }
+
+    window.editCert = function(id) {
+        const c = window.loadedCerts[id];
+        editingCertId = id; 
+        const inputs = document.getElementById('certForm').querySelectorAll('.form-input');
+        inputs[0].value = c.name || ""; inputs[1].value = c.date || ""; inputs[2].value = c.verifyLink || "";
+        document.getElementById('certForm').querySelector('button').innerText = "Update Certificate";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('certForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button'); btn.innerText = "Saving...";
+        const inputs = e.target.querySelectorAll('.form-input');
+        try {
+            let imageUrl = editingCertId ? window.loadedCerts[editingCertId].imageUrl : "";
+            if (inputs[3].files[0]) {
+                const sRef = ref(storage, 'certificates/' + inputs[3].files[0].name);
+                await uploadBytes(sRef, inputs[3].files[0]);
+                imageUrl = await getDownloadURL(sRef); 
+            }
+            const data = { name: inputs[0].value, date: inputs[1].value, verifyLink: inputs[2].value, imageUrl: imageUrl };
+            
+            if (editingCertId) { await updateDoc(doc(db, "certificates", editingCertId), data); } 
+            else { data.createdAt = new Date(); await addDoc(collection(db, "certificates"), data); }
+            
+            e.target.reset(); editingCertId = null; btn.innerText = "Save Certificate"; loadAdminCerts();
+        } catch (err) { alert("Error saving cert."); btn.innerText = "Save Certificate"; }
+    });
+
+
+    // ==========================================
+    // RESUME UPLOAD LOGIC
+    // ==========================================
+    document.getElementById('resumeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button'); 
+        const fileInput = e.target.querySelector('.form-input');
+        
+        if (!fileInput.files[0]) { alert("Please select a PDF first!"); return; }
+        
+        btn.innerText = "Uploading Resume...";
+        try {
+            // Upload the PDF to Firebase Storage
+            const sRef = ref(storage, 'files/Abid_TS_Resume.pdf');
+            await uploadBytes(sRef, fileInput.files[0]);
+            const pdfUrl = await getDownloadURL(sRef); 
+
+            // Save the download URL to a special settings document in Firestore
+            await setDoc(doc(db, "settings", "resume"), { url: pdfUrl });
+
+            alert("Resume successfully updated and live!");
+            e.target.reset();
+        } catch (err) { console.error(err); alert("Error uploading resume."); }
+        finally { btn.innerText = "Upload & Replace Resume"; }
+    });
+
+    // Run initial loads
+    loadAdminProjects();
+    loadAdminCerts();
+</script>
+</body>
+</html>
