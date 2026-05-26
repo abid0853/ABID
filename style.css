@@ -133,7 +133,17 @@ body {
 .image-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* SECTIONS */
-.section { padding: 100px 10%; }
+/* SECTIONS */
+.section { 
+    /* clamp() smoothly shrinks the padding on smaller or zoomed-out screens */
+    padding: clamp(50px, 8vh, 100px) 10%; 
+}
+
+/* Fixes the 1px white-line glitch on mobile desktop view */
+.section.dark {
+    margin-top: -1px;
+    padding-top: calc(clamp(50px, 8vh, 100px) + 1px);
+}
 .container { max-width: 1200px; margin: 0 auto; }
 .section-tag { font-size: 0.75rem; letter-spacing: 4px; color: #bbb; margin-bottom: 40px; }
 .large-text { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.2; font-weight: 300; margin-bottom: 40px; }
@@ -414,3 +424,16 @@ footer { background: var(--black); color: var(--white); padding: 100px 10% 40px;
                 gap: 15px !important;
             }
         }
+
+/* Center project cards perfectly on mobile phones */
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr; /* Forces a single column */
+    }
+    
+    .project-card {
+        max-width: 450px; /* Prevents the card from stretching weirdly */
+        margin: 0 auto;   /* Pushes it perfectly to the center */
+        width: 100%;
+    }
+}

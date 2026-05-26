@@ -65,6 +65,12 @@
         <div class="logo-container">
             <a href="index.html" class="logo">ABID  <span>TS</span></a>
         </div>
+        
+        <input type="checkbox" id="nav-check">
+        <label for="nav-check" class="nav-toggler">
+            <span></span>
+        </label>
+
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="index.html#contact" class="nav-cta">Connect</a>
@@ -131,6 +137,15 @@
     }
     loadCerts();
 </script>
+<script>
+        // Auto-close mobile menu when a link is clicked
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                const navCheck = document.getElementById('nav-check');
+                if (navCheck) navCheck.checked = false;
+            });
+        });
+    </script>
 
 </body>
 </html>
