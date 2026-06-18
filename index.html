@@ -218,5 +218,16 @@
     fetchResumeUrl();
 </script>
 
+<script>
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        document.getElementById('nav-check').checked = false;
+    });
+});
+</script>
+
+</body>
+</html>
+
 </body>
 </html>
